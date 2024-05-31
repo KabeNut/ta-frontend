@@ -7,3 +7,7 @@
     width: 100%;
     background-color: #f5f5f5;
 }
+
+.selfAlignRight {
+    align-self: flex-end !important;
+}

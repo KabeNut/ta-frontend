@@ -46,7 +46,9 @@ function TableEws() {
         setOxygen(oxygen.data);
     }
 
-    const setTable = async () => {
+    useEffect(() => {
+        if (!pulse || !systol || !diastol || !respiration || !oxygen) return;
+
         setRows([
             createData(pulse.vital_model.name,
                 `< ${pulse.first_percentile}`,
@@ -93,14 +95,8 @@ function TableEws() {
                 `${oxygen.ninetyfifth_percentile} - ${oxygen.ninetyninth_percentile}`,
                 `> ${oxygen.ninetyninth_percentile}`
             )
-        ])
-    }
-
-    useEffect(() => {
-        if (!pulse || !systol || !diastol || !respiration || !oxygen) return;
-
-        setTable();
-
+        ]);
+        
     }, [pulse, systol, diastol, respiration, oxygen])
 
     useEffect(() => {

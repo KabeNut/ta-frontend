@@ -1,12 +1,13 @@
 import React from "react";
 import "../assets/css/pages/Login.css";
+import { NavLink } from "react-router-dom";
 
 function Login() {
   return (
     <div className="login-web">
       <div className="left-side">
         <h1 style={{ color: "#007bff" }}>H HOSPITAL</h1>
-        <form style={{ display: "contents" }} action="login.php" method="post">
+        <form style={{ display: "contents" }}>
           <div className="card">
             <div className="card-head">
               <h2 style={{ margin: 0 }}>Selamat Datang</h2>
@@ -39,11 +40,13 @@ function Login() {
               </div>
             </div>
             <div className="card-footer">
-              <input
-                className="form-login-submit"
-                type="submit"
-                value="Masuk"
-              ></input>
+              <NavLink to={'/home'} style={{ "text-decoration": "none" }}>
+                <input
+                  className="form-login-submit"
+                  type="submit"
+                  value="Masuk"
+                ></input>
+              </NavLink>
             </div>
           </div>
         </form>

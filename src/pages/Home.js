@@ -16,6 +16,7 @@ import { visuallyHidden } from '@mui/utils';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
+import { useNavigate } from "react-router-dom";
 
 function createData(
     id,
@@ -53,6 +54,7 @@ function Home() {
     const [isDeleted, setIsDeleted] = useState(false);
     const [vitalData, setVitalData] = useState(null);
     const [rows, setRows] = useState([]);
+    const navigate = useNavigate();
     const headCells = [
         {
             id: 'patient',
@@ -118,8 +120,6 @@ function Home() {
             ),
         [order, orderBy, page, rowsPerPage, rows],
     );
-
-    console.log("visibleRows", visibleRows);
 
     function descendingComparator(a, b, orderBy) {
         if (b[orderBy] < a[orderBy]) {
@@ -202,7 +202,7 @@ function Home() {
                     {headCells.map((headCell) => (
                         <TableCell
                             key={headCell.id}
-                            align={headCell.numeric ? 'right' : 'left'}
+                            align={'center'}
                             padding={headCell.disablePadding ? 'none' : 'normal'}
                             sortDirection={orderBy === headCell.id ? order : false}
                         >
@@ -300,11 +300,11 @@ function Home() {
                         {
                             row.deleted_at === null ? (
                                 <>
-                                    <EditIcon sx={{ color: "blue", margin: "3px" }} />
-                                    <DeleteIcon onClick={() => handleDelete(row.id)} sx={{ color: "red", margin: "3px" }} />
+                                    <EditIcon onClick={() => navigate(`/form/${row.id}`)} sx={{ color: "blue", margin: "3px", cursor: 'pointer' }} />
+                                    <DeleteIcon onClick={() => handleDelete(row.id)} sx={{ color: "red", margin: "3px", cursor: 'pointer' }} />
                                 </>
                             ) : (
-                                < RestoreFromTrashIcon sx={{ color: "green" }} onClick={() => handleRestore(row.id)} />
+                                < RestoreFromTrashIcon sx={{ color: "green", cursor: 'pointer' }} onClick={() => handleRestore(row.id)} />
                             )
                         }
                     </TableCell>
@@ -375,7 +375,7 @@ function Home() {
     }, [isDeleted])
 
     return (
-        <Box sx={{ width: '100%' }}>
+        <Box sx={{ width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
                 <EnhancedTableToolbar />
                 <TableContainer>
@@ -399,7 +399,7 @@ function Home() {
                             {emptyRows > 0 && (
                                 <TableRow
                                     style={{
-                                        height: (53) * emptyRows,
+                                        height: (80) * emptyRows,
                                     }}
                                 >
                                     <TableCell colSpan={11} />

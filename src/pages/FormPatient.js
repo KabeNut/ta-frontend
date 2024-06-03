@@ -47,25 +47,25 @@ function FormPatient() {
         }
     };
 
-    const getVitalData = async () => {
-        try {
-            const vitalData = await axios.get(`http://localhost:8000/api/patients/${id}`);
-            setName(vitalData.data.name);
-            setGender(vitalData.data.gender);
-            setAge(vitalData.data.age);
-            setHeight(vitalData.data.height);
-            setWeight(vitalData.data.weight);
-        } catch (error) {
-            console.error("Error fetching Patient Data:", error);
-        }
-    }
-
     useEffect(() => {
+        const getVitalData = async () => {
+            try {
+                const vitalData = await axios.get(`http://localhost:8000/api/patients/${id}`);
+                setName(vitalData.data.name);
+                setGender(vitalData.data.gender);
+                setAge(vitalData.data.age);
+                setHeight(vitalData.data.height);
+                setWeight(vitalData.data.weight);
+            } catch (error) {
+                console.error("Error fetching Patient Data:", error);
+            }
+        }
+
         if (id) {
             getVitalData();
         }
         setIsLoading(false);
-    }, []);
+    }, [id]);
 
     return !isLoading && (
         <div className="form-web">

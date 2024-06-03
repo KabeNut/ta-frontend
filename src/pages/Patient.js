@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import "../assets/css/pages/Home.css";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -102,13 +102,18 @@ function Patient() {
         }
     ]
     const emptyRows = Math.max(0, (1 + page) * rowsPerPage - rows.length);
+    const getComparator = useCallback((order, orderBy) => {
+        return order === 'desc'
+            ? (a, b) => descendingComparator(a, b, orderBy)
+            : (a, b) => -descendingComparator(a, b, orderBy);
+    }, []);
     const visibleRows = React.useMemo(
         () =>
             stableSort(rows, getComparator(order, orderBy)).slice(
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
             ),
-        [order, orderBy, page, rowsPerPage, rows],
+        [order, orderBy, page, rowsPerPage, rows, getComparator],
     );
 
     function descendingComparator(a, b, orderBy) {
@@ -119,12 +124,6 @@ function Patient() {
             return 1;
         }
         return 0;
-    }
-
-    function getComparator(order, orderBy) {
-        return order === 'desc'
-            ? (a, b) => descendingComparator(a, b, orderBy)
-            : (a, b) => -descendingComparator(a, b, orderBy);
     }
 
     function stableSort(array, comparator) {
@@ -154,7 +153,7 @@ function Patient() {
         setPage(0);
     }
 
-    const getVitalData = async () => {
+    const getVitalData = useCallback(async () => {
         setIsLoading(true);
         if (isDeleted) {
             const data = await axios.get("http://127.0.0.1:8000/api/patients?filter=include_deleted")
@@ -163,7 +162,7 @@ function Patient() {
             const data = await axios.get("http://127.0.0.1:8000/api/patients")
             setVitalData(data.data)
         }
-    }
+    }, [isDeleted, setIsLoading, setVitalData]);
 
     const handleChange = () => {
         setIsDeleted(!isDeleted);
@@ -327,7 +326,7 @@ function Patient() {
 
     useEffect(() => {
         getVitalData()
-    }, [isDeleted])
+    }, [isDeleted, getVitalData])
 
     return isLoading ? (
         <Box sx={{ width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>

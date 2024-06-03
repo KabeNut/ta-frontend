@@ -10,22 +10,20 @@ function Detail() {
     const [dataDetail, setDataDetail] = useState();
     const [isLoading, setIsLoading] = useState(true);
 
-    const getDetail = async () => {
-        try {
-            // Add axios GET request here for fetching detail
-            const { data } = await axios.get(`http://127.0.0.1:8000/api/vitaldata/${id}`);
-            setDataDetail(data);
-            setIsLoading(false);
-            console.log("Data:", data);
-        } catch (error) {
-            console.error("Error fetching detail:", error);
+    useEffect(() => {
+        const getDetail = async () => {
+            try {
+                const { data } = await axios.get(`http://127.0.0.1:8000/api/vitaldata/${id}`);
+                setDataDetail(data);
+                setIsLoading(false);
+                console.log("Data:", data);
+            } catch (error) {
+                console.error("Error fetching detail:", error);
+            }
         }
 
-    }
-
-    useEffect(() => {
         getDetail();
-    }, [])
+    }, [id])
 
     return isLoading ? (
         <Box sx={{

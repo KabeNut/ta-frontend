@@ -68,24 +68,24 @@ function Form() {
         setPatients(data);
     };
 
-    const getVitalData = async () => {
-        const vitalData = await axios.get(`http://localhost:8000/api/vitaldata/${id}`);
-        setSelectedPatient({ label: vitalData.data.patient.name, id: vitalData.data.patient.id, gender: vitalData.data.patient.gender });
-        setGender(vitalData.data.patient.gender);
-        setPulse(vitalData.data.pulse);
-        setRespirationRate(vitalData.data.respiration_rate);
-        setSystolicBloodPressure(vitalData.data.systol);
-        setDiastolicBloodPressure(vitalData.data.diastol);
-        setOxygenSaturation(vitalData.data.oxygen_saturation);
-        setTemperature(vitalData.data.temperature);
-    }
-
     useEffect(() => {
+        const getVitalData = async () => {
+            const vitalData = await axios.get(`http://localhost:8000/api/vitaldata/${id}`);
+            setSelectedPatient({ label: vitalData.data.patient.name, id: vitalData.data.patient.id, gender: vitalData.data.patient.gender });
+            setGender(vitalData.data.patient.gender);
+            setPulse(vitalData.data.pulse);
+            setRespirationRate(vitalData.data.respiration_rate);
+            setSystolicBloodPressure(vitalData.data.systol);
+            setDiastolicBloodPressure(vitalData.data.diastol);
+            setOxygenSaturation(vitalData.data.oxygen_saturation);
+            setTemperature(vitalData.data.temperature);
+        }
+
         if (id) {
             getVitalData();
         }
         setIsLoading(false);
-    }, [patients]);
+    }, [patients, id]);
 
     useEffect(() => {
         getPatients();

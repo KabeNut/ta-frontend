@@ -115,13 +115,20 @@ function Home() {
         }
     ]
     const emptyRows = Math.max(0, (1 + page) * rowsPerPage - rows.length);
+
+    const getComparator = React.useCallback((order, orderBy) => {
+        return order === 'desc'
+            ? (a, b) => descendingComparator(a, b, orderBy)
+            : (a, b) => -descendingComparator(a, b, orderBy);
+    }, []);
+
     const visibleRows = React.useMemo(
         () =>
             stableSort(rows, getComparator(order, orderBy)).slice(
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
             ),
-        [order, orderBy, page, rowsPerPage, rows],
+        [rows, getComparator, order, orderBy, page, rowsPerPage],
     );
 
     function descendingComparator(a, b, orderBy) {
@@ -134,11 +141,6 @@ function Home() {
         return 0;
     }
 
-    function getComparator(order, orderBy) {
-        return order === 'desc'
-            ? (a, b) => descendingComparator(a, b, orderBy)
-            : (a, b) => -descendingComparator(a, b, orderBy);
-    }
 
     function stableSort(array, comparator) {
         const stabilizedThis = array.map((el, index) => [el, index]);
@@ -167,7 +169,7 @@ function Home() {
         setPage(0);
     }
 
-    const getVitalData = async () => {
+    const getVitalData = React.useCallback(async () => {
         setIsLoading(true);
         if (isDeleted) {
             const data = await axios.get("http://127.0.0.1:8000/api/vitaldata?filter=include_deleted")
@@ -176,7 +178,7 @@ function Home() {
             const data = await axios.get("http://127.0.0.1:8000/api/vitaldata")
             setVitalData(data.data)
         }
-    }
+    }, [isDeleted, setIsLoading, setVitalData]);
 
     const handleChange = () => {
         setIsDeleted(!isDeleted);
@@ -396,7 +398,7 @@ function Home() {
 
     useEffect(() => {
         getVitalData()
-    }, [isDeleted])
+    }, [isDeleted, getVitalData])
 
     return isLoading ? (
         <Box sx={{ width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>

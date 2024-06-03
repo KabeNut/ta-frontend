@@ -8,47 +8,40 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import axios from "axios";
-import { Box, Button, Collapse, FormControl, FormControlLabel, IconButton, Radio, RadioGroup, Skeleton, Stack, TablePagination, TableSortLabel, Toolbar, Typography } from "@mui/material";
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { Box, Button, FormControl, FormControlLabel, Radio, RadioGroup, Skeleton, Stack, TablePagination, TableSortLabel, Toolbar, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import moment from "moment/moment";
 import { visuallyHidden } from '@mui/utils';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 import { Link, useNavigate } from "react-router-dom";
 
 function createData(
     id,
-    patient,
-    respiration,
-    oxygen,
-    pulse,
-    systol,
-    diastol,
-    ews_score,
+    name,
+    age,
+    height,
+    weight,
+    gender,
     created_at,
-    deleted_at,
-    biometrics
+    updated_at,
+    deleted_at
 ) {
     return {
         id,
-        patient,
-        respiration,
-        oxygen,
-        pulse,
-        systol,
-        diastol,
-        ews_score,
+        name,
+        age,
+        height,
+        weight,
+        gender,
         created_at,
-        deleted_at,
-        biometrics
+        updated_at,
+        deleted_at
     };
 }
 
-function Home() {
+function Patient() {
     const [order, setOrder] = React.useState('asc');
     const [isLoading, setIsLoading] = useState(true);
     const [orderBy, setOrderBy] = React.useState('created_at');
@@ -60,57 +53,51 @@ function Home() {
     const navigate = useNavigate();
     const headCells = [
         {
-            id: 'patient',
+            id: 'name',
             numeric: false,
             disablePadding: true,
-            label: 'Patient',
+            label: 'Name',
         },
         {
-            id: 'respiration',
-            numeric: true,
-            disablePadding: false,
-            label: 'Respiration Rate',
+            id: 'age',
+            numeric: false,
+            disablePadding: true,
+            label: 'Age',
         },
         {
-            id: 'oxygen',
+            id: 'height',
             numeric: true,
-            disablePadding: false,
-            label: 'Oxygen Saturation',
+            disablePadding: true,
+            label: 'Height',
         },
         {
-            id: 'pulse',
+            id: 'weight',
             numeric: true,
-            disablePadding: false,
-            label: 'Pulse',
+            disablePadding: true,
+            label: 'Weight',
         },
         {
-            id: 'systol',
-            numeric: true,
-            disablePadding: false,
-            label: 'Systol',
-        },
-        {
-            id: 'diastol',
-            numeric: true,
-            disablePadding: false,
-            label: 'Diastol',
-        },
-        {
-            id: 'ews_score',
-            numeric: true,
-            disablePadding: false,
-            label: 'EWS Score',
+            id: 'gender',
+            numeric: false,
+            disablePadding: true,
+            label: 'Gender',
         },
         {
             id: 'created_at',
             numeric: false,
-            disablePadding: false,
+            disablePadding: true,
             label: 'Created At',
+        },
+        {
+            id: 'updated_at',
+            numeric: false,
+            disablePadding: true,
+            label: 'Updated At',
         },
         {
             id: 'deleted_at',
             numeric: false,
-            disablePadding: false,
+            disablePadding: true,
             label: 'Deleted At',
         }
     ]
@@ -170,10 +157,10 @@ function Home() {
     const getVitalData = async () => {
         setIsLoading(true);
         if (isDeleted) {
-            const data = await axios.get("http://127.0.0.1:8000/api/vitaldata?filter=include_deleted")
+            const data = await axios.get("http://127.0.0.1:8000/api/patients?filter=include_deleted")
             setVitalData(data.data)
         } else {
-            const data = await axios.get("http://127.0.0.1:8000/api/vitaldata")
+            const data = await axios.get("http://127.0.0.1:8000/api/patients")
             setVitalData(data.data)
         }
     }
@@ -184,13 +171,13 @@ function Home() {
 
     const handleDelete = async (id) => {
         setIsLoading(true);
-        await axios.delete(`http://127.0.0.1:8000/api/vitaldata/${id}/`);
+        await axios.delete(`http://127.0.0.1:8000/api/patients/${id}/`);
         await getVitalData();
     }
 
     const handleRestore = async (id) => {
         setIsLoading(true);
-        await axios.post(`http://127.0.0.1:8000/api/vitaldata/${id}/restore/`);
+        await axios.post(`http://127.0.0.1:8000/api/patients/${id}/restore/`);
         await getVitalData();
     }
 
@@ -203,7 +190,6 @@ function Home() {
         return (
             <TableHead>
                 <TableRow>
-                    <TableCell />
                     {headCells.map((headCell) => (
                         <TableCell
                             key={headCell.id}
@@ -249,9 +235,9 @@ function Home() {
                         id="tableTitle"
                         component="div"
                     >
-                        Vital Signs
+                        Patient Data
                     </Typography>
-                    <Link to="/form" style={{ textDecoration: 'none' }}>
+                    <Link to="/formPatient" style={{ textDecoration: 'none' }}>
                         <Button
                             startIcon={<AddIcon />}
                             variant="contained"
@@ -284,81 +270,33 @@ function Home() {
     function Row(props) {
         const { row } = props;
 
-        const [open, setOpen] = useState(false);
-
         return (
             <Fragment>
                 <TableRow
                     key={row.id}
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                    <TableCell>
-                        <IconButton
-                            aria-label="expand row"
-                            size="small"
-                            onClick={() => setOpen(!open)}
-                        >
-                            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                        </IconButton>
+                    <TableCell align='center' component="th" scope="row">
+                        {row.name}
                     </TableCell>
-                    <TableCell component="th" scope="row">
-                        {row.patient}
-                    </TableCell>
-                    <TableCell align="center">{row.respiration}</TableCell>
-                    <TableCell align="center">{row.oxygen}</TableCell>
-                    <TableCell align="center">{row.pulse}</TableCell>
-                    <TableCell align="center">{row.systol}</TableCell>
-                    <TableCell align="center">{row.diastol}</TableCell>
-                    <TableCell align="center">{row.ews_score}</TableCell>
+                    <TableCell align="center">{row.age}</TableCell>
+                    <TableCell align="center">{row.height}</TableCell>
+                    <TableCell align="center">{row.weight}</TableCell>
+                    <TableCell align="center">{row.gender}</TableCell>
                     <TableCell align="center">{moment(row.created_at).format("LLL")}</TableCell>
+                    <TableCell align="center">{moment(row.updated_at).format("LLL")}</TableCell>
                     <TableCell align="center">{row.deleted_at ? moment(row.deleted_at).format("LLL") : '-'}</TableCell>
                     <TableCell align="center">
                         {
                             row.deleted_at === null ? (
                                 <Box justifyContent={'space-between'}>
-                                    <RemoveRedEyeOutlinedIcon onClick={() => navigate(`/Detail/${row.id}`)} sx={{ color: "blue", margin: "3px", cursor: 'pointer' }} />
-                                    <EditIcon onClick={() => navigate(`/form/${row.id}`)} sx={{ color: "orange", margin: "3px", cursor: 'pointer' }} />
+                                    <EditIcon onClick={() => navigate(`/formPatient/${row.id}`)} sx={{ color: "orange", margin: "3px", cursor: 'pointer' }} />
                                     <DeleteIcon onClick={() => handleDelete(row.id)} sx={{ color: "red", margin: "3px", cursor: 'pointer' }} />
                                 </Box>
                             ) : (
                                 < RestoreFromTrashIcon sx={{ color: "green", cursor: 'pointer' }} onClick={() => handleRestore(row.id)} />
                             )
                         }
-                    </TableCell>
-                </TableRow>
-                <TableRow>
-                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                        <Collapse in={open} timeout="auto" unmountOnExit>
-                            <Box sx={{ margin: 1 }}>
-                                <Typography variant="h6" gutterBottom component="div">
-                                    Biometrics
-                                </Typography>
-                                <Table size="small" aria-label="purchases">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Age</TableCell>
-                                            <TableCell>Height</TableCell>
-                                            <TableCell>Weight</TableCell>
-                                            <TableCell>Gender</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        <TableCell component="th" scope="row">
-                                            {row.biometrics.age}
-                                        </TableCell>
-                                        <TableCell component="th" scope="row">
-                                            {row.biometrics.height}
-                                        </TableCell>
-                                        <TableCell component="th" scope="row">
-                                            {row.biometrics.weight}
-                                        </TableCell>
-                                        <TableCell component="th" scope="row">
-                                            {row.biometrics.gender}
-                                        </TableCell>
-                                    </TableBody>
-                                </Table>
-                            </Box>
-                        </Collapse>
                     </TableCell>
                 </TableRow>
             </Fragment>
@@ -371,21 +309,14 @@ function Home() {
             vitalData.forEach((data) => {
                 table.push(createData(
                     data.id,
-                    data.patient.name,
-                    data.respiration_rate,
-                    data.oxygen_saturation,
-                    data.pulse,
-                    data.systol,
-                    data.diastol,
-                    data.ews_score.toFixed(2),
+                    data.name,
+                    data.age,
+                    data.height,
+                    data.weight,
+                    data.gender,
                     data.created_at,
-                    data.deleted_at,
-                    {
-                        age: data.patient.age,
-                        height: data.patient.height,
-                        weight: data.patient.weight,
-                        gender: data.patient.gender
-                    }
+                    data.updated_at,
+                    data.deleted_at
                 ))
             })
             setRows(table)
@@ -428,7 +359,7 @@ function Home() {
                             )}
                             {visibleRows.map((row) => {
                                 return (
-                                    <Row key={row.name} row={row} />
+                                    <Row key={row.id} row={row} />
                                 )
                             })}
                             {emptyRows > 0 && visibleRows.length !== 0 && (
@@ -457,4 +388,4 @@ function Home() {
     );
 }
 
-export default Home;
+export default Patient;

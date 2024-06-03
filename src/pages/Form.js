@@ -1,13 +1,14 @@
 import { useNavigate, useParams } from "react-router-dom";
 import "../assets/css/pages/Form.css";
 import axios from "axios";
-import { Autocomplete, Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 
 function Form() {
     const { id } = useParams();
+    const [isLoading, setIsLoading] = useState(true);
     const [patients, setPatients] = useState([]);
-    const [selectedPatient, setSelectedPatient] = useState(null);
+    const [selectedPatient, setSelectedPatient] = useState({ label: '', id: '', gender: '' });
     const [gender, setGender] = useState('');
     const [pulse, setPulse] = useState('');
     const [respirationRate, setRespirationRate] = useState('');
@@ -16,10 +17,6 @@ function Form() {
     const [oxygenSaturation, setOxygenSaturation] = useState('');
     const [temperature, setTemperature] = useState('');
     const navigate = useNavigate();
-
-    const handleChange = (event) => {
-        setGender(event.target.value);
-    };
 
     const handleSubmit = async () => {
         const formData = {
@@ -62,7 +59,7 @@ function Form() {
         try {
             const patientResult = await axios.get(`http://localhost:8000/api/patients`);
             patientResult.data.forEach((item) => {
-                data.push({ label: item.name, id: item.id });
+                data.push({ label: item.name, id: item.id, gender: item.gender });
             });
         } catch (error) {
             console.error("Error fetching patients:", error);
@@ -72,31 +69,29 @@ function Form() {
     };
 
     const getVitalData = async () => {
-        try {
-            const vitalData = await axios.get(`http://localhost:8000/api/vitaldata/${id}`);
-            setSelectedPatient({ label: vitalData.data.patient.name, id: vitalData.data.patient.id });
-            setPulse(vitalData.data.pulse);
-            setRespirationRate(vitalData.data.respiration_rate);
-            setSystolicBloodPressure(vitalData.data.systol);
-            setDiastolicBloodPressure(vitalData.data.diastol);
-            setOxygenSaturation(vitalData.data.oxygen_saturation);
-            setTemperature(vitalData.data.temperature);
-        } catch (error) {
-            console.error("Error fetching vital data:", error);
-        }
+        const vitalData = await axios.get(`http://localhost:8000/api/vitaldata/${id}`);
+        setSelectedPatient({ label: vitalData.data.patient.name, id: vitalData.data.patient.id, gender: vitalData.data.patient.gender });
+        setGender(vitalData.data.patient.gender);
+        setPulse(vitalData.data.pulse);
+        setRespirationRate(vitalData.data.respiration_rate);
+        setSystolicBloodPressure(vitalData.data.systol);
+        setDiastolicBloodPressure(vitalData.data.diastol);
+        setOxygenSaturation(vitalData.data.oxygen_saturation);
+        setTemperature(vitalData.data.temperature);
     }
 
     useEffect(() => {
         if (id) {
             getVitalData();
         }
+        setIsLoading(false);
     }, [patients]);
 
     useEffect(() => {
         getPatients();
     }, []);
 
-    return patients.length !== 0 && (
+    return !isLoading && (
         <div className="form-web">
             <div className="form-container">
                 <div className="form-card">
@@ -114,23 +109,25 @@ function Form() {
                                     required
                                     readOnly={!!id}
                                     options={patients}
-                                    defaultValue={selectedPatient}
+                                    value={selectedPatient}
+                                    getOptionLabel={(option) => option.label}
                                     renderInput={(params) => <TextField {...params} label="Patient" />}
-                                    onChange={(event, value) => setSelectedPatient(value)}
+                                    onChange={(event, newValue) => {
+                                        setSelectedPatient(newValue)
+                                        setGender(newValue.gender)
+                                    }}
+                                    isOptionEqualToValue={(option, value) => option.id === value.id}
                                 />
-                                {/* <FormControl fullWidth>
-                                    <InputLabel id="gender-label">Gender</InputLabel>
-                                    <Select
-                                        labelId="gender-label"
-                                        id="gender-select"
-                                        value={gender}
-                                        label="Gender"
-                                        onChange={handleChange}
-                                    >
-                                        <MenuItem value={'laki-laki'}>Laki-Laki</MenuItem>
-                                        <MenuItem value={'perempuan'}>Perempuan</MenuItem>
-                                    </Select>
-                                </FormControl> */}
+                                <TextField
+                                    id="gender"
+                                    label="Gender"
+                                    type="text"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    value={gender}
+                                    disabled
+                                />
                                 <TextField
                                     id="pulse"
                                     label="Pulse"
@@ -151,6 +148,14 @@ function Form() {
                                     value={respirationRate}
                                     onChange={(e) => setRespirationRate(e.target.value)}
                                 />
+                            </Box>
+                        </div>
+                        <div className="form-body-right">
+                            <Box
+                                component="form"
+                                display="flex"
+                                sx={{ flexDirection: 'column', gap: 2 }}
+                            >
                                 <TextField
                                     id="systolic-blood-pressure"
                                     label="Systolic Blood Pressure"
@@ -161,14 +166,6 @@ function Form() {
                                     value={systolicBloodPressure}
                                     onChange={(e) => setSystolicBloodPressure(e.target.value)}
                                 />
-                            </Box>
-                        </div>
-                        <div className="form-body-right">
-                            <Box
-                                component="form"
-                                display="flex"
-                                sx={{ flexDirection: 'column', gap: 2 }}
-                            >
                                 <TextField
                                     id="diastolic-blood-pressure"
                                     label="Diastolic Blood Pressure"

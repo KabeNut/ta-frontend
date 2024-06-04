@@ -91,12 +91,12 @@ function TableEws() {
                 `${oxygen.first_percentile} - ${oxygen.fifth_percentile}`,
                 `${oxygen.fifth_percentile} - ${oxygen.tenth_percentile}`,
                 `${oxygen.tenth_percentile} - ${oxygen.ninetieth_percentile}`,
-                `${oxygen.ninetieth_percentile} - ${oxygen.ninetyfifth_percentile}`,
-                `${oxygen.ninetyfifth_percentile} - ${oxygen.ninetyninth_percentile}`,
+                ``,
+                ``,
                 `> ${oxygen.ninetyninth_percentile}`
             )
         ]);
-        
+
     }, [pulse, systol, diastol, respiration, oxygen])
 
     useEffect(() => {

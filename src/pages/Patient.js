@@ -156,10 +156,10 @@ function Patient() {
     const getVitalData = useCallback(async () => {
         setIsLoading(true);
         if (isDeleted) {
-            const data = await axios.get("http://127.0.0.1:8000/api/patients?filter=include_deleted")
+            const data = await axios.get("http://localhost:8000/api/patients?filter=include_deleted")
             setVitalData(data.data)
         } else {
-            const data = await axios.get("http://127.0.0.1:8000/api/patients")
+            const data = await axios.get("http://localhost:8000/api/patients")
             setVitalData(data.data)
         }
     }, [isDeleted, setIsLoading, setVitalData]);
@@ -170,13 +170,13 @@ function Patient() {
 
     const handleDelete = async (id) => {
         setIsLoading(true);
-        await axios.delete(`http://127.0.0.1:8000/api/patients/${id}/`);
+        await axios.delete(`http://localhost:8000/api/patients/${id}/`);
         await getVitalData();
     }
 
     const handleRestore = async (id) => {
         setIsLoading(true);
-        await axios.post(`http://127.0.0.1:8000/api/patients/${id}/restore/`);
+        await axios.post(`http://localhost:8000/api/patients/${id}/restore/`);
         await getVitalData();
     }
 

@@ -13,7 +13,7 @@ function Detail() {
     useEffect(() => {
         const getDetail = async () => {
             try {
-                const { data } = await axios.get(`http://127.0.0.1:8000/api/vitaldata/${id}`);
+                const { data } = await axios.get(`http://localhost:8000/api/vitaldata/${id}`);
                 setDataDetail(data);
                 setIsLoading(false);
                 console.log("Data:", data);

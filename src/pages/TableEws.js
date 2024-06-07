@@ -33,11 +33,11 @@ function TableEws() {
     const [rows, setRows] = useState([]);
 
     const getLatestTableEws = async () => {
-        const pulse = await axios.get("http://127.0.0.1:8000/api/centilemodel/Pulse/getLatest/");
-        const systol = await axios.get("http://127.0.0.1:8000/api/centilemodel/Systol/getLatest/");
-        const diastol = await axios.get("http://127.0.0.1:8000/api/centilemodel/Diastol/getLatest/");
-        const respiration = await axios.get("http://127.0.0.1:8000/api/centilemodel/Respiration/getLatest/");
-        const oxygen = await axios.get("http://127.0.0.1:8000/api/centilemodel/Oxygen/getLatest/");
+        const pulse = await axios.get("http://localhost:8000/api/centilemodel/Pulse/getLatest/");
+        const systol = await axios.get("http://localhost:8000/api/centilemodel/Systol/getLatest/");
+        const diastol = await axios.get("http://localhost:8000/api/centilemodel/Diastol/getLatest/");
+        const respiration = await axios.get("http://localhost:8000/api/centilemodel/Respiration/getLatest/");
+        const oxygen = await axios.get("http://localhost:8000/api/centilemodel/Oxygen/getLatest/");
 
         setPulse(pulse.data);
         setSystol(systol.data);

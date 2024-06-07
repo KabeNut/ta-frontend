@@ -172,10 +172,10 @@ function Home() {
     const getVitalData = React.useCallback(async () => {
         setIsLoading(true);
         if (isDeleted) {
-            const data = await axios.get("http://127.0.0.1:8000/api/vitaldata?filter=include_deleted")
+            const data = await axios.get("http://localhost:8000/api/vitaldata?filter=include_deleted")
             setVitalData(data.data)
         } else {
-            const data = await axios.get("http://127.0.0.1:8000/api/vitaldata")
+            const data = await axios.get("http://localhost:8000/api/vitaldata")
             setVitalData(data.data)
         }
     }, [isDeleted, setIsLoading, setVitalData]);
@@ -186,13 +186,13 @@ function Home() {
 
     const handleDelete = async (id) => {
         setIsLoading(true);
-        await axios.delete(`http://127.0.0.1:8000/api/vitaldata/${id}/`);
+        await axios.delete(`http://localhost:8000/api/vitaldata/${id}/`);
         await getVitalData();
     }
 
     const handleRestore = async (id) => {
         setIsLoading(true);
-        await axios.post(`http://127.0.0.1:8000/api/vitaldata/${id}/restore/`);
+        await axios.post(`http://localhost:8000/api/vitaldata/${id}/restore/`);
         await getVitalData();
     }
 

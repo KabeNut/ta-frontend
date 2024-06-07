@@ -1,0 +1,10 @@
+{
+    "apps": [
+        {
+            "name": "ta-frontend",
+            "args": "start",
+            "script": "npm",
+            "exec_mode": "fork"
+        }
+    ]
+}

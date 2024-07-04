@@ -8,7 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import axios from "axios";
-import { Box, Button, FormControl, FormControlLabel, Radio, RadioGroup, Skeleton, Stack, TablePagination, TableSortLabel, Toolbar, Typography } from "@mui/material";
+import { Box, Button, FormControl, FormControlLabel, IconButton, InputBase, Radio, RadioGroup, Skeleton, Stack, TablePagination, TableSortLabel, Toolbar, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import moment from "moment/moment";
 import { visuallyHidden } from '@mui/utils';
@@ -16,6 +16,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 import { Link, useNavigate } from "react-router-dom";
+import SearchIcon from '@mui/icons-material/Search';
 
 function createData(
     id,
@@ -49,6 +50,7 @@ function Patient() {
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [isDeleted, setIsDeleted] = useState(false);
     const [vitalData, setVitalData] = useState(null);
+    const [patientName, setPatientName] = useState('');
     const [rows, setRows] = useState([]);
     const navigate = useNavigate();
     const headCells = [
@@ -153,13 +155,23 @@ function Patient() {
         setPage(0);
     }
 
-    const getVitalData = useCallback(async () => {
+    const getVitalData = useCallback(async (name) => {
         setIsLoading(true);
+        let query = "http://localhost:8000/api/patients/"
         if (isDeleted) {
-            const data = await axios.get("http://localhost:8000/api/patients?filter=include_deleted")
+            query += "?filter=include_deleted"
+            if (name) {
+                query += `&q=${name}`
+            }
+
+            const data = await axios.get(query)
             setVitalData(data.data)
         } else {
-            const data = await axios.get("http://localhost:8000/api/patients")
+            if (name) {
+                query += `?q=${name}`
+            }
+
+            const data = await axios.get(query)
             setVitalData(data.data)
         }
     }, [isDeleted, setIsLoading, setVitalData]);
@@ -178,6 +190,13 @@ function Patient() {
         setIsLoading(true);
         await axios.post(`http://localhost:8000/api/patients/${id}/restore/`);
         await getVitalData();
+    }
+
+    const handleSubmitResult = (event) => {
+        event.preventDefault();
+        getVitalData(patientName);
+
+        console.log(event);
     }
 
     function EnhancedTableHead(props) {
@@ -219,50 +238,6 @@ function Patient() {
                     </TableCell>
                 </TableRow>
             </TableHead>
-        );
-    }
-
-    function EnhancedTableToolbar() {
-        return (
-            <Toolbar>
-                <Stack
-                    direction={{ xs: 'column', sm: 'row' }}
-                    sx={{ flex: '1 1 100%', gap: 2 }}
-                >
-                    <Typography
-                        variant="h6"
-                        id="tableTitle"
-                        component="div"
-                    >
-                        Patient Data
-                    </Typography>
-                    <Link to="/formPatient" style={{ textDecoration: 'none' }}>
-                        <Button
-                            startIcon={<AddIcon />}
-                            variant="contained"
-                        >Add New</Button>
-                    </Link>
-
-                </Stack>
-                <FormControl sx={{ flex: '100%', flexDirection: 'row-reverse' }}>
-                    <RadioGroup row aria-label="position" name="position" defaultValue={isDeleted}>
-                        <FormControlLabel
-                            value="true"
-                            control={<Radio />}
-                            label="Show Deleted"
-                            labelPlacement="end"
-                            onChange={handleChange}
-                        />
-                        <FormControlLabel
-                            value="false"
-                            control={<Radio />}
-                            label="Don't Show Deleted"
-                            labelPlacement="end"
-                            onChange={handleChange}
-                        />
-                    </RadioGroup>
-                </FormControl>
-            </Toolbar>
         );
     }
 
@@ -335,7 +310,61 @@ function Patient() {
     ) : (
         <Box sx={{ width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
-                <EnhancedTableToolbar />
+                <Toolbar>
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        sx={{ flex: '1 1 100%', gap: 2 }}
+                    >
+                        <Typography
+                            variant="h6"
+                            id="tableTitle"
+                            component="div"
+                        >
+                            Patient Data
+                        </Typography>
+                        <Link to="/formPatient" style={{ textDecoration: 'none' }}>
+                            <Button
+                                startIcon={<AddIcon />}
+                                variant="contained"
+                            >Add New</Button>
+                        </Link>
+
+                    </Stack>
+                    <FormControl sx={{ flex: '100%', flexDirection: 'column' }}>
+                        <RadioGroup row aria-label="position" name="position" defaultValue={isDeleted} sx={{ justifyContent: 'flex-end' }}>
+                            <FormControlLabel
+                                value="true"
+                                control={<Radio />}
+                                label="Show Deleted"
+                                labelPlacement="end"
+                                onChange={handleChange}
+                            />
+                            <FormControlLabel
+                                value="false"
+                                control={<Radio />}
+                                label="Don't Show Deleted"
+                                labelPlacement="end"
+                                onChange={handleChange}
+                            />
+                        </RadioGroup>
+                        <Paper
+                            component="form"
+                            sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 325, alignSelf: 'flex-end' }}
+                            onSubmit={handleSubmitResult}
+                        >
+                            <InputBase
+                                sx={{ ml: 1, flex: 1 }}
+                                placeholder="Search Patient Name"
+                                InputLabelProps={{ shrink: true, }}
+                                value={patientName}
+                                onChange={(e) => setPatientName(e.target.value)}
+                            />
+                            <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
+                                <SearchIcon />
+                            </IconButton>
+                        </Paper>
+                    </FormControl>
+                </Toolbar>
                 <TableContainer>
                     <Table
                         sx={{ minWidth: 750 }}

@@ -8,7 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import axios from "axios";
-import { Box, Button, Collapse, FormControl, FormControlLabel, IconButton, Radio, RadioGroup, Skeleton, Stack, TablePagination, TableSortLabel, Toolbar, Typography } from "@mui/material";
+import { Box, Button, Collapse, FormControl, FormControlLabel, IconButton, InputBase, Radio, RadioGroup, Skeleton, Stack, TablePagination, TableSortLabel, Toolbar, Typography } from "@mui/material";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import AddIcon from '@mui/icons-material/Add';
@@ -19,6 +19,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 import { Link, useNavigate } from "react-router-dom";
+import SearchIcon from '@mui/icons-material/Search';
 
 function createData(
     id,
@@ -56,6 +57,7 @@ function Home() {
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [isDeleted, setIsDeleted] = useState(false);
     const [vitalData, setVitalData] = useState(null);
+    const [patientName, setPatientName] = useState('');
     const [rows, setRows] = useState([]);
     const navigate = useNavigate();
     const headCells = [
@@ -141,7 +143,6 @@ function Home() {
         return 0;
     }
 
-
     function stableSort(array, comparator) {
         const stabilizedThis = array.map((el, index) => [el, index]);
         stabilizedThis.sort((a, b) => {
@@ -169,13 +170,23 @@ function Home() {
         setPage(0);
     }
 
-    const getVitalData = React.useCallback(async () => {
+    const getVitalData = React.useCallback(async (name) => {
         setIsLoading(true);
+        let query = "http://localhost:8000/api/vitaldata/"
         if (isDeleted) {
-            const data = await axios.get("http://localhost:8000/api/vitaldata?filter=include_deleted")
+            query += "?filter=include_deleted"
+            if (name) {
+                query += `&q=${name}`
+            }
+
+            const data = await axios.get(query)
             setVitalData(data.data)
         } else {
-            const data = await axios.get("http://localhost:8000/api/vitaldata")
+            if (name) {
+                query += `?q=${name}`
+            }
+
+            const data = await axios.get(query)
             setVitalData(data.data)
         }
     }, [isDeleted, setIsLoading, setVitalData]);
@@ -239,50 +250,6 @@ function Home() {
         );
     }
 
-    function EnhancedTableToolbar() {
-        return (
-            <Toolbar>
-                <Stack
-                    direction={{ xs: 'column', sm: 'row' }}
-                    sx={{ flex: '1 1 100%', gap: 2 }}
-                >
-                    <Typography
-                        variant="h6"
-                        id="tableTitle"
-                        component="div"
-                    >
-                        Vital Signs
-                    </Typography>
-                    <Link to="/form" style={{ textDecoration: 'none' }}>
-                        <Button
-                            startIcon={<AddIcon />}
-                            variant="contained"
-                        >Add New</Button>
-                    </Link>
-
-                </Stack>
-                <FormControl sx={{ flex: '100%', flexDirection: 'row-reverse' }}>
-                    <RadioGroup row aria-label="position" name="position" defaultValue={isDeleted}>
-                        <FormControlLabel
-                            value="true"
-                            control={<Radio />}
-                            label="Show Deleted"
-                            labelPlacement="end"
-                            onChange={handleChange}
-                        />
-                        <FormControlLabel
-                            value="false"
-                            control={<Radio />}
-                            label="Don't Show Deleted"
-                            labelPlacement="end"
-                            onChange={handleChange}
-                        />
-                    </RadioGroup>
-                </FormControl>
-            </Toolbar>
-        );
-    }
-
     function Row(props) {
         const { row } = props;
 
@@ -311,7 +278,12 @@ function Home() {
                     <TableCell align="center">{row.pulse}</TableCell>
                     <TableCell align="center">{row.systol}</TableCell>
                     <TableCell align="center">{row.diastol}</TableCell>
-                    <TableCell align="center">{row.ews_score}</TableCell>
+                    <TableCell align="center" sx={{
+                        ...(row.ews_score < 1 && { color: 'green' }),
+                        ...(row.ews_score >= 1 && row.ews_score < 2 && { color: '#FFD300' }),
+                        ...(row.ews_score >= 2 && row.ews_score < 3 && { color: '#CC7722' }),
+                        ...(row.ews_score >= 3 && { color: 'red' })
+                    }}>{row.ews_score}</TableCell>
                     <TableCell align="center">{moment(row.created_at).format("LLL")}</TableCell>
                     <TableCell align="center">{row.deleted_at ? moment(row.deleted_at).format("LLL") : '-'}</TableCell>
                     <TableCell align="center">
@@ -367,6 +339,13 @@ function Home() {
         )
     }
 
+    const handleSubmitResult = (event) => {
+        event.preventDefault();
+        getVitalData(patientName);
+
+        console.log(event);
+    }
+
     useEffect(() => {
         if (vitalData) {
             const table = []
@@ -407,7 +386,61 @@ function Home() {
     ) : (
         <Box sx={{ width: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
-                <EnhancedTableToolbar />
+                <Toolbar>
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        sx={{ flex: '1 1 100%', gap: 2 }}
+                    >
+                        <Typography
+                            variant="h6"
+                            id="tableTitle"
+                            component="div"
+                        >
+                            Vital Signs
+                        </Typography>
+                        <Link to="/form" style={{ textDecoration: 'none' }}>
+                            <Button
+                                startIcon={<AddIcon />}
+                                variant="contained"
+                            >Add New</Button>
+                        </Link>
+
+                    </Stack>
+                    <FormControl sx={{ flex: '100%', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                        <RadioGroup row aria-label="position" name="position" defaultValue={isDeleted} sx={{ justifyContent: 'flex-end' }}>
+                            <FormControlLabel
+                                value="true"
+                                control={<Radio />}
+                                label="Show Deleted"
+                                labelPlacement="end"
+                                onChange={handleChange}
+                            />
+                            <FormControlLabel
+                                value="false"
+                                control={<Radio />}
+                                label="Don't Show Deleted"
+                                labelPlacement="end"
+                                onChange={handleChange}
+                            />
+                        </RadioGroup>
+                        <Paper
+                            component="form"
+                            sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 325, alignSelf: 'flex-end' }}
+                            onSubmit={handleSubmitResult}
+                        >
+                            <InputBase
+                                sx={{ ml: 1, flex: 1 }}
+                                placeholder="Search Patient Name"
+                                InputLabelProps={{ shrink: true, }}
+                                value={patientName}
+                                onChange={(e) => setPatientName(e.target.value)}
+                            />
+                            <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
+                                <SearchIcon />
+                            </IconButton>
+                        </Paper>
+                    </FormControl>
+                </Toolbar>
                 <TableContainer>
                     <Table
                         sx={{ minWidth: 750 }}

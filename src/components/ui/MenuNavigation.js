@@ -52,7 +52,7 @@ function MenuNavigation() {
                             <span className="sidebar-menu-label">Help</span>
                         </div>
                     </div>
-                    <NavLink to={'/login'} style={{ "textDecoration": "none" }}>
+                    <NavLink to={'/home'} style={{ "textDecoration": "none" }}>
                         <div className="sidebar-menu-item-inverse">
                             <div>
                                 <FontAwesomeIcon icon={faArrowRightFromBracket} style={{ "marginLeft": 20 }} />

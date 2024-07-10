@@ -142,6 +142,17 @@ function TableEws() {
                     </Table>
                 </TableContainer>
             </div>
+            <div className="ews-legend">
+                <div className="legend-body">
+                    <div>
+                        <div className="legend-color" style={{ backgroundColor: "#FF0000" }}></div>
+                        <div className="legend-text">Score 3        : Critical</div>
+                        <div className="legend-text">Score 2 - 3    : Serious</div>
+                        <div className="legend-text">Score 1 - 2    : Fair </div>
+                        <div className="legend-text">Score 0 - 1     : Normal </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
